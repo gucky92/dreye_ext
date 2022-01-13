@@ -1,20 +1,9 @@
-# [WIP] dreye
-
-## DrEye: Exploiting Color Space Geometry for Visual Stimulus Design across Animals
-
-Dreye is still being actively developed and tested, and documentation will be added soon. Currently, we are redesigning some of the API in order to make it easier to use and speed up some of our algorithms. Our redesign will be finished by mid-November, but our old API will remain for backwards compatibility
-
-The current documentation focuses on the old API, but will be updated in the next weeks.
-
-## Timeline for new API release
-
-* Jan 25: Tutorials for new API
-* Jan 31: Web application for stimulus design and color space manipulation
+# DrEye: Exploiting Color Space Geometry for Visual Stimulus Design across Animals
 
 ## Installation
 
 ```
-pip install dreye
+pip install dreye_ext
 ```
 
 ## Hardware module
@@ -28,5 +17,4 @@ pip install nidaqmx>=0.5.7
 
 ## Development
 
-Currently, we are redesigning the API for ease-of-use. If you are interested in helping us redesign and contribute to our project, please email at gucky@gucky.eu.
-We would also love any type of general feedback or contributions to the code and methods implemented.
+This is the code for the old API of dreye. This repository is no longer properly maintained. For the new API go to https://github.com/gucky92/dreye.
