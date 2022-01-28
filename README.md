@@ -1,5 +1,7 @@
 # DrEye: Exploiting Color Space Geometry for Visual Stimulus Design across Animals
 
+This is the code for the old API of dreye. This repository is no longer properly maintained. For the new API go to https://github.com/gucky92/dreye.
+
 ## Installation
 
 ```

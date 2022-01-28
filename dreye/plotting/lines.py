@@ -8,9 +8,11 @@ from matplotlib import cm
 import matplotlib as mpl
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+
 def clip_scale(data, vmin, vmax):
     scaled = (data - vmin) / (vmax - vmin)
     return np.clip(scaled, 0, 1)
+
 
 def gradient_color_lineplot(
     *xargs,

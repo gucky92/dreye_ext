@@ -145,12 +145,12 @@ def proj_P_to_simplex(P, c):
 
 def proj_B_to_hull(B, equations):
     """
-    Project `X` to the convex hull defined by the
+    Project `B` to the convex hull defined by the
     hyperplane equations of the facets
 
     Parameters
     ----------
-    X : numpy.ndarray (..., ndim)
+    B : numpy.ndarray (..., ndim)
     equations : numpy.ndarray (nfacets, ndim + 1)
 
     Returns
@@ -174,6 +174,9 @@ def alpha_for_B_with_P(B, equations):
     """
     Get multiple of vector that intersects with hull
     """
+    # need to transpose
+    equations = equations.T
+    # transform and bias
     V, b = equations[:-1], equations[-1]
     alpha = -b / (B @ V)
     # mask smaller equal to zero values

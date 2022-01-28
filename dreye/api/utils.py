@@ -162,7 +162,7 @@ def l2norm(arr, axis=-1, keepdims=False):
 
     Parameters
     ----------
-    arr : array-like
+    arr : ndarray
         Array used to calculate the L2-norm.
     axis : int, optional
         Axis to normalize along, by default -1
@@ -171,7 +171,7 @@ def l2norm(arr, axis=-1, keepdims=False):
 
     Returns
     -------
-    l2norm : array-like
+    l2norm : ndarray
         L2-norm or array along axis.
     """
     return norm(arr, ord=2, axis=axis, keepdims=keepdims)
@@ -182,7 +182,7 @@ def l1norm(arr, axis=-1, keepdims=False):
 
     Parameters
     ----------
-    arr : array-like
+    arr : ndarray
         Array used to calculate the L1-norm.
     axis : int, optional
         Axis to normalize along, by default -1
@@ -191,10 +191,48 @@ def l1norm(arr, axis=-1, keepdims=False):
 
     Returns
     -------
-    l1norm : array-like
+    l1norm : ndarray
         L1-norm or array along axis.
     """
     return norm(arr, ord=1, axis=axis, keepdims=keepdims)
+
+
+def integral(arr, domain, axis=-1, keepdims=False):
+    """Calculate the integral of an array given its domain along an axis
+
+    Parameters
+    ----------
+    arr : ndarray of shape (..., n_domain, ...)
+        The array to use to obtain the integral.
+    domain : float or ndarray of shape (n_domain)
+        The domain for `arr` along the given axis. 
+        If a float, it is assumed to be the step size of the domain.
+    axis : int, optional
+        The axis of the domain dimension, by default -1
+    keepdims : bool, optional
+        Whether to keep the dimensionality or not, by default False
+
+    Returns
+    -------
+    integral : ndarray
+        Integral of the array along given axis.
+    """
+    kwargs = {'axis': axis}
+    if isinstance(domain, Number):
+        kwargs['dx'] = domain
+    else:
+        kwargs['x'] = domain
+    trapz = np.trapz(arr, **kwargs)
+    if keepdims:
+        return trapz[_keepdims_slice_helper(arr.shape, axis)]
+    else:
+        return trapz
+    
+    
+def _keepdims_slice_helper(shape, axis):
+    slices = len(shape) * [slice(None, None, None)]
+    slices[axis] = None
+    return tuple(slices)
 
 
 def signif(x, p=1):
