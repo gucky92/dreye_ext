@@ -537,7 +537,7 @@ class ReceptorEstimator:
     def sample_in_gamut(self, *args, **kwargs):
         """Alias for `ReceptorEstimator.sample_in_hull`. 
         """
-        return self.sample_in_gamut(*args, **kwargs)
+        return self.sample_in_hull(*args, **kwargs)
     
     def sample_in_hull(self, n=10, seed=None, engine=None, l1=None, relative=True):
         """
@@ -558,6 +558,8 @@ class ReceptorEstimator:
         l1 : float, optional
             Whether to sample points that correspond to a specific L1-norm. 
             By default None.
+        relative : bool, optional
+            Whether `B` are relative capture values, by default True.
 
         Returns
         -------
@@ -573,9 +575,9 @@ class ReceptorEstimator:
             return sample_in_hull(P, n, seed=seed, engine=engine)
         else:
             # sample within a simplex
-            l1 = P.sum(axis=-1)
+            l1_P = P.sum(axis=-1)
             # remove zero intensity
-            P = P[l1 != 0]
+            P = P[l1_P != 0]
             # reduce to barycentric coordinates and sample within that hull
             P = barycentric_dim_reduction(P)
             X = sample_in_hull(P, n, seed=seed, engine=engine)
@@ -910,9 +912,9 @@ class ReceptorEstimator:
         else:
             raise NameError(f"Model name `{model}` unknown.")
             
-        self.X = X
-        self.B = B
         if internal:
+            self.X = X
+            self.B = B
             return self
         return X, B
     
@@ -999,10 +1001,10 @@ class ReceptorEstimator:
             **opt_kwargs
         )
         
-        self.X = X
-        self.B = B
-        self.scales = scales
         if internal:
+            self.X = X
+            self.B = B
+            self.scales = scales
             return self
         return X, scales, B
     
@@ -1107,10 +1109,10 @@ class ReceptorEstimator:
             **opt_kwargs 
         )
         
-        self.X = X
-        self.P = P
-        self.B = B
         if internal:
+            self.X = X
+            self.P = P
+            self.B = B
             return self
         return X, P, B
     
@@ -1187,9 +1189,9 @@ class ReceptorEstimator:
             **opt_kwargs
         )
         
-        self.X = X
-        self.B = B
         if internal:
+            self.X = X
+            self.B = B
             return self
         return X, B
     
@@ -1276,10 +1278,10 @@ class ReceptorEstimator:
             **opt_kwargs
         )
         
-        self.X = X
-        self.B = B
-        self.Bvar = Bvar
         if internal:
+            self.X = X
+            self.B = B
+            self.Bvar = Bvar
             return self
         return X, B, Bvar
     
@@ -1368,6 +1370,10 @@ class ReceptorEstimator:
         domain_line=True,
         labels=None,
         label_size=16,
+        scalar_gradient_line=1,
+        cmap_B=None,
+        rescale=False, 
+        transform=None,
         **kwargs
     ):
         """
@@ -1422,6 +1428,16 @@ class ReceptorEstimator:
             By default None.
         label_size : int, optional
             The size of each label, by default 16.
+        scalar_gradient_line : float, optional
+            Scalar used to scale the gradient line before calculating the relative 
+            capture of the single wavelength gradient line.
+        cmap_B : str, optional
+            Colormap used for the `B` scatter points.
+        rescale : bool, optional
+            Whether to rescale the corners to fill out the tetrahedron according to 
+            the optimal wavelength line.
+        transform : callable, optional
+            Function to apply to `B` and single wavelength line.
         kwargs : key, value mappings
             Other keyword arguments are passed down to `matplotlib.axes.Axes.scatter()`
             for the `B` points.
@@ -1457,11 +1473,23 @@ class ReceptorEstimator:
             domain = np.arange(dmin, dmax, domain)
             
         # dirac delta functions for perfect excitation
-        signals = np.eye(self.filters.shape[-1])
+        signals = np.eye(self.filters.shape[-1]) * scalar_gradient_line
         if relative:
             optimal = self.relative_capture(signals)
         else:
             optimal = self.capture(signals)
+            
+        # transforming capture values
+        if transform is not None:
+            optimal = transform(optimal)
+            if B is not None:
+                B = transform(B)
+                
+        if rescale:
+            omax = optimal.max(0)
+            optimal = optimal / omax
+            if B is not None:
+                B = B / omax
             
         ax = plot_simplex(
             n, ax=ax, labels=labels, label_size=label_size
@@ -1479,7 +1507,7 @@ class ReceptorEstimator:
             gradient_line_kws['cmap'] = cmap
             
             ax = plot_simplex(
-                n, 
+                n,
                 ax=ax,
                 gradient_line=points, 
                 gradient_color=domain, 
@@ -1548,6 +1576,8 @@ class ReceptorEstimator:
             )
             
         if B is not None:
+            if cmap_B is not None:
+                kwargs['cmap'] = cmap_B
             ax = plot_simplex(
                 n, 
                 ax=ax, 
