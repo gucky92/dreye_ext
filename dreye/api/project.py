@@ -10,9 +10,12 @@ B : numpy.ndarray (npoints x ndim)
 """
 
 from scipy.spatial import ConvexHull
+try:
+    from scipy.spatial import QhullError
+except ImportError:
+    from scipy.spatial.qhull import QhullError
 from itertools import product
 import numpy as np
-from scipy.spatial.qhull import QhullError
 from sklearn.decomposition import PCA
 
 from quadprog import solve_qp

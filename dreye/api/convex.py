@@ -14,7 +14,10 @@ import warnings
 from itertools import combinations, product
 import numpy as np
 from scipy.spatial import Delaunay
-from scipy.spatial.qhull import QhullError
+try:
+    from scipy.spatial import QhullError
+except ImportError:
+    from scipy.spatial.qhull import QhullError
 import cvxpy as cp
 
 from dreye.api.optimize.lsq_linear import lsq_linear
@@ -113,8 +116,9 @@ def in_hull(P, B, bounded=True, qhull_options=None):
     if bounded:
         try:
             # try hull algorithm before relying on convex combination algorithm
-            hull = Delaunay(P, qhull_options=qhull_options)
-            inhull = hull.find_simplex(B) >= 0
+            if not isinstance(P, Delaunay):
+                P = Delaunay(P, qhull_options=qhull_options)
+            inhull = P.find_simplex(B) >= 0
         except QhullError:
             _, _, inhull = convex_combination(P, B, bounded=bounded)
     else:
